@@ -1,7 +1,10 @@
 from django.db import models
-
+from datetime import datetime
+import pytz
 
 # Create your models here.
+utc=pytz.UTC
+
 
 class AutoModel(models.Model):
     brand = models.CharField('Brand', max_length=200)
@@ -22,7 +25,7 @@ class Service(models.Model):
     price = models.FloatField(verbose_name="Price")
 
     def __str__(self):
-        return f"{self.name}: {self.price}"
+        return f"{self.name}: {self.price} euro"
 
     class Meta:
         verbose_name = 'Service'
@@ -45,7 +48,7 @@ class Car(models.Model):
 
 
 class Order(models.Model):
-    order_date = models.DateTimeField('Order Date', auto_now_add=True)
+    order_date = models.DateTimeField('Order Date', default=datetime.today().replace(tzinfo=utc))
     car_id = models.ForeignKey('Car', verbose_name="Car", on_delete=models.SET_NULL, null=True)
 
     @property
@@ -64,14 +67,14 @@ class Order(models.Model):
         verbose_name_plural = 'Orders'
 
     STATUS = (
-        ('p', 'Confirmed'),
-        ('v', 'In progress'),
-        ('a', 'Completed'),
-        ('t', 'Canceled'),
+        ('con', 'Confirmed'),
+        ('pr', 'In progress'),
+        ('com', 'Completed'),
+        ('can', 'Canceled'),
     )
 
     status = models.CharField(
-        max_length=1,
+        max_length=3,
         choices=STATUS,
         blank=True,
         default='p',
