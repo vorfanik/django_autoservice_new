@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Car{% endblock %}
+
+{% block content %}
+{% load static %}
+<div class="nikita">
+    <h4>{{ car.auto_model_id.brand }} {{ car.auto_model_id.car_model }}</h4>
+    <hr/>
+    <p><strong>Owner:</strong> {{ car.client }}</p>
+    <p><strong>Year:</strong> {{ car.auto_model_id.year }}</p>
+    <p><strong>Engine:</strong> {{ car.auto_model_id.engine }}</p>
+    <p><strong>License plate:</strong> {{ car.license_plate }}</p>
+    <p><strong>VIN code:</strong> {{ car.vin }}</p>
+</div>
+{% endblock %}

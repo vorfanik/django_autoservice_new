@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Cars{% endblock %}
+
+{% block content %}
+{% load static %}
+<h1>Cars</h1>
+{% if cars %}
+<p>Cars registered in our service.</p>
+{% for car in cars %}
+<li><a href="{{ car.id }}">{{car.client}}, {{car.auto_model_id}} </a></li>
+{% endfor %}
+{% else %}
+<p>No registered cars.</p>
+{% endif %}
+{% endblock %}

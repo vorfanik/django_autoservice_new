@@ -13,7 +13,7 @@ class AutoModel(models.Model):
     engine = models.CharField('Engine', max_length=200)
 
     def __str__(self):
-        return f"{self.brand}, {self.car_model}, {self.engine}, {self.year}"
+        return f"{self.brand} {self.car_model}, {self.engine}, {self.year}"
 
     class Meta:
         verbose_name = 'Car model'
@@ -40,7 +40,7 @@ class Car(models.Model):
                            help_text='17 Characters <a href="https://www.vindecoderz.com/">VIN code</a>')
 
     def __str__(self):
-        return f"{self.client}: {self.auto_model_id}, {self.license_plate}, VIN: {self.vin}"
+        return f"{self.client}, {self.auto_model_id}, {self.license_plate}, VIN: {self.vin}"
 
     class Meta:
         verbose_name = 'Car'
@@ -83,7 +83,7 @@ class Order(models.Model):
 
 
 class OrderingLine(models.Model):
-    order_id = models.ForeignKey('Order', verbose_name="Order", on_delete=models.SET_NULL, null=True)
+    order_id = models.ForeignKey('Order', verbose_name="Order", on_delete=models.SET_NULL, null=True, related_name='order_line')
     service = models.ForeignKey('Service', verbose_name="Service", on_delete=models.SET_NULL, null=True)
     quantity = models.IntegerField("Quantity")
 

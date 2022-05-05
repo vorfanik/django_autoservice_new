@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+{% load static %}
+<h1>Orders</h1>
+{% if orders %}
+<p>All orders in our service.</p>
+{% for order in orders %}
+<li><a href="{{ order.id }}">{{order.car_id.client}}, {{order.car_id.auto_model_id.brand}}</a>, {{order.order_date}}</li>
+{% endfor %}
+{% else %}
+<p>No orders.</p>
+{% endif %}
+{% endblock %}
