@@ -3,11 +3,14 @@
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
-  <h1>Autoservice</h1>
-  <p>Autoservice statistics:</p>
-  <ul>
+<h1>Autoservice</h1>
+<br>
+<p>Autoservice statistics:</p>
+<ul>
     <li><strong>Services: </strong> {{ services }}</li>
+    <br>
     <li><strong>Orders done: </strong> {{ completed_services }}</li>
+    <br>
     <li><strong>Cars: </strong> {{ cars }}</li>
-  </ul>
+</ul>
 {% endblock %}

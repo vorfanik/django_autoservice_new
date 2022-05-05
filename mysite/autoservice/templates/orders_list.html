@@ -9,8 +9,27 @@
 <p>All orders in our service.</p>
 {% for order in orders %}
 <li><a href="{{ order.id }}">{{order.car_id.client}}, {{order.car_id.auto_model_id.brand}}</a>, {{order.order_date}}</li>
+<br>
 {% endfor %}
 {% else %}
 <p>No orders.</p>
 {% endif %}
+<hr>
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; pirmas</a>
+            <a href="?page={{ page_obj.previous_page_number }}">atgal</a>
+        {% endif %}
+
+        <span class="current">
+            {{ page_obj.number }} iš {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">pirmyn</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">paskutinis &raquo;</a>
+        {% endif %}
+    </span>
+</div>
 {% endblock %}

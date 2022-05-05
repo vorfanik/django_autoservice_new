@@ -4,7 +4,8 @@
 
 {% block content %}
 <div>
-    <p><strong>Car:</strong> {{ orders.car_id }}</p>
+    <h6> {{ orders.car_id }}</h6>
+    <br>
     <p><strong>Total Price:</strong> {{ orders.sum }}</p>
     <p><strong>Status:</strong> {{ orders.get_status_display }}</p>
     <br>
@@ -14,9 +15,8 @@
     {% for line in orders.order_line.all %}
     <hr>
     <p><strong>{{ line.service.name }} </strong></p>
-    <p><strong>Quantitys:</strong> {{ line.quantity }}
     <p><strong>Price:</strong> {{ line.service.price }} </p>
-    <p><strong>Sum:</strong> {{ line.sum }}</p>
+    <p><strong>Quantitys:</strong> {{ line.quantity }}   <strong>Sum:</strong> {{ line.sum }}</p>
     {% endfor %}
 </div>
 

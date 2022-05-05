@@ -4,7 +4,16 @@
 
 {% block content %}
 {% load static %}
-<div class="nikita">
+<div class="col-md-5 d-flex align-items-stretch">
+    <div class="card mb-4 shadow-sm">
+        {% if car.image %}
+        <img src="{{ car.image.url }}" class="card-img-top" alt="...">
+        {% else %}
+        <img src="{% static 'img/no_image.jpg' %}" class="card-img-top">
+        {% endif %}
+    </div>
+</div>
+<div>
     <h4>{{ car.auto_model_id.brand }} {{ car.auto_model_id.car_model }}</h4>
     <hr/>
     <p><strong>Owner:</strong> {{ car.client }}</p>
@@ -13,4 +22,6 @@
     <p><strong>License plate:</strong> {{ car.license_plate }}</p>
     <p><strong>VIN code:</strong> {{ car.vin }}</p>
 </div>
+
+
 {% endblock %}

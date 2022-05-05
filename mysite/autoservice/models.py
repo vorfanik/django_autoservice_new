@@ -39,6 +39,8 @@ class Car(models.Model):
     vin = models.CharField('VIN code', max_length=20,
                            help_text='17 Characters <a href="https://www.vindecoderz.com/">VIN code</a>')
 
+    image = models.ImageField('Image', upload_to='cars_image', null=True)
+
     def __str__(self):
         return f"{self.client}, {self.auto_model_id}, {self.license_plate}, VIN: {self.vin}"
 
