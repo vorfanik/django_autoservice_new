@@ -22,7 +22,7 @@ class AutoModel(models.Model):
 
 class Service(models.Model):
     name = models.CharField('Name', max_length=200)
-    price = models.FloatField(verbose_name="Price")
+    price = models.FloatField(verbose_name="Price", null=True)
 
     def __str__(self):
         return f"{self.name}: {self.price} euro"

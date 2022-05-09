@@ -13,11 +13,15 @@ def index(request):
     completed_services = Order.objects.filter(status__exact='com').count()
     cars = Car.objects.count()
 
+    num_visits = request.session.get('num_visits', 1)
+    request.session['num_visits'] = num_visits + 1
+
     # perduodame informaciją į šabloną žodyno pavidale:
     context = {
         'services': services,
         'completed_services': completed_services,
         'cars': cars,
+        'num_visits': num_visits,
     }
 
     # renderiname base.html, su duomenimis kintamąjame context
