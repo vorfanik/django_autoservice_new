@@ -1,10 +1,18 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import AutoModel, Service, Car, Order, OrderingLine
-from django.shortcuts import render, get_object_or_404
+from .models import AutoModel, Service, Car, Order, OrdersReview
+from django.shortcuts import render, get_object_or_404, reverse
 from django.views import generic
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
+from django.contrib.auth.forms import User
+from django.views.decorators.csrf import csrf_protect
+from django.contrib import messages
+from .forms import BookReviewForm
+from django.views.generic.edit import FormMixin
+
 
 # Create your views here.
 
@@ -27,6 +35,7 @@ def index(request):
     # renderiname base.html, su duomenimis kintamąjame context
     return render(request, 'index.html', context=context)
 
+
 def cars(request):
     paginator = Paginator(Car.objects.all(), 2)
     page_number = request.GET.get('page')
@@ -35,6 +44,7 @@ def cars(request):
         'cars': paged_car
     }
     return render(request, 'cars.html', context=context)
+
 
 def car(request, car_id):
     car = get_object_or_404(Car, pk=car_id)
@@ -47,10 +57,33 @@ class OrdersListView(generic.ListView):
     template_name = 'orders_list.html'
     context_object_name = 'orders'
 
-class OrdersDetailView(generic.DetailView):
+
+class OrdersDetailView(FormMixin, generic.DetailView):
     model = Order
     template_name = 'orders_detail.html'
     context_object_name = 'orders'
+    form_class = BookReviewForm
+
+    # nurodome, kur atsidursime komentaro sėkmės atveju.
+    def get_success_url(self):
+        return reverse('order_datails', kwargs={'pk': self.object.id})
+
+    # standartinis post metodo perrašymas, naudojant FormMixin, galite kopijuoti tiesiai į savo projektą.
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    # štai čia nurodome, kad knyga bus būtent ta, po kuria komentuojame, o vartotojas bus tas, kuris yra prisijungęs.
+    def form_valid(self, form):
+        form.instance.order = self.object
+        form.instance.reviewer = self.request.user
+        form.save()
+        return super(OrdersDetailView, self).form_valid(form)
+
 
 def search(request):
     """
@@ -60,5 +93,45 @@ def search(request):
     didžiosios/mažosios.
     """
     query = request.GET.get('query')
-    search_results = Car.objects.filter(Q(client__icontains=query) | Q(vin__icontains=query) | Q(license_plate__icontains=query) | Q(auto_model_id__brand__icontains=query) | Q(auto_model_id__car_model__icontains=query))
+    search_results = Car.objects.filter(
+        Q(client__icontains=query) | Q(vin__icontains=query) | Q(license_plate__icontains=query) | Q(
+            auto_model_id__brand__icontains=query) | Q(auto_model_id__car_model__icontains=query))
     return render(request, 'search.html', {'cars': search_results, 'query': query})
+
+
+class OrdersByUserListView(LoginRequiredMixin, generic.ListView):
+    model = Order
+    template_name = 'user_orders.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user).filter(status__exact='pr' or 'com').order_by('return_time')
+
+
+@csrf_protect
+def register(request):
+    if request.method == "POST":
+        # pasiimame reikšmes iš registracijos formos
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+        password2 = request.POST['password2']
+        # tikriname, ar sutampa slaptažodžiai
+        if password == password2:
+            # tikriname, ar neužimtas username
+            if User.objects.filter(username=username).exists():
+                messages.error(request, f'User name {username} already exists!')
+                return redirect('register')
+            else:
+                # tikriname, ar nėra tokio pat email
+                if User.objects.filter(email=email).exists():
+                    messages.error(request, f'User with email Email {email} is already registered!')
+                    return redirect('register')
+                else:
+                    # jeigu viskas tvarkoje, sukuriame naują vartotoją
+                    User.objects.create_user(username=username, email=email, password=password)
+                    return redirect('login')
+        else:
+            messages.error(request, 'Passwords do not match!')
+            return redirect('register')
+    return render(request, 'registration/register.html')

@@ -30,6 +30,9 @@
             <li><a href="{% url 'cars' %}" class="nav-link px-2 link-dark">Cars</a></li>
             <li><a href="{% url 'orders' %}" class="nav-link px-2 link-dark">Orders</a></li>
             <li><a href="#" class="nav-link px-2 link-dark">About</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'my_orders' %}" class="nav-link px-2 link-dark">My orders</a></li>
+            {% endif %}
         </ul>
 
 
@@ -53,9 +56,8 @@
         </div>
         {% else %}
         <div class="col-md-3 text-end">
-            <a class="btn btn-outline-warning me-2" href="{% url 'login'%}?next={{request.path}}"
-               role="button">Login</a>
-            <a class="btn btn-secondary" href="#" role="button">Sign-up</a>
+            <a class="btn btn-outline-warning me-2" href="{% url 'login' %}" role="button">Login</a>
+            <a class="btn btn-secondary" href="{% url 'register' %}" role="button">Sign-up</a>
         </div>
         {% endif %}
 

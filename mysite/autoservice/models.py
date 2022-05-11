@@ -1,6 +1,8 @@
 from django.db import models
 from datetime import datetime
 import pytz
+from django.contrib.auth.models import User
+from tinymce.models import HTMLField
 
 # Create your models here.
 utc=pytz.UTC
@@ -40,6 +42,7 @@ class Car(models.Model):
                            help_text='17 Characters <a href="https://www.vindecoderz.com/">VIN code</a>')
 
     image = models.ImageField('Image', upload_to='cars_image', null=True)
+    description = HTMLField('Description', null=True)
 
     def __str__(self):
         return f"{self.client}, {self.auto_model_id}, {self.license_plate}, VIN: {self.vin}"
@@ -51,7 +54,15 @@ class Car(models.Model):
 
 class Order(models.Model):
     order_date = models.DateTimeField('Order Date', default=datetime.today().replace(tzinfo=utc))
+    return_time = models.DateTimeField('Return time', null=True, blank=True)
     car_id = models.ForeignKey('Car', verbose_name="Car", on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    @property
+    def is_overdue(self):
+        if self.return_time and datetime.today().replace(tzinfo=utc) > self.return_time:
+            return True
+        return False
 
     @property
     def sum(self):
@@ -101,3 +112,9 @@ class OrderingLine(models.Model):
     class Meta:
         verbose_name = 'Order line'
         verbose_name_plural = 'Order lines'
+
+class OrdersReview(models.Model):
+    order = models.ForeignKey('Order', on_delete=models.SET_NULL, null=True, blank=True, related_name='reviews')
+    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    date_created = models.DateTimeField('Order Date', default=datetime.today().replace(tzinfo=utc))
+    content = models.TextField('Rewiew', max_length=2000)

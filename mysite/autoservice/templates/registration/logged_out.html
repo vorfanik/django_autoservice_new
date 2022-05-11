@@ -3,6 +3,10 @@
 {% block title %}Logout{% endblock %}
 
 {% block content %}
-  <p>You have successfully logged out!</p>
-  <a href="{% url 'login'%}">Log in again.</a>
+<br>
+  <h6>You have successfully logged out!</h6>
+<br>
+  <div class="btn-group btn-group-sm">
+            <a href="{% url 'login' %}" class="btn btn-outline-warning me-2">Log in again.</a>
+  </div>
 {% endblock %}

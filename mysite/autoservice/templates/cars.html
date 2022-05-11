@@ -9,6 +9,7 @@
 <p>Cars registered in our service.</p>
 {% for car in cars %}
 <li><a href="{{ car.id }}">{{car.client}}, {{car.auto_model_id}} </a></li>
+<p>{{car.description | safe}}</p>
 <br>
 {% endfor %}
 {% else %}
