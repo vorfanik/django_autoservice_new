@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AutoModel, Service, Car, Order, OrderingLine, OrdersReview
+from .models import AutoModel, Service, Car, Order, OrderingLine, OrdersReview, Profile
 
 # Register your models here.
 
@@ -37,3 +37,4 @@ admin.site.register(Service, ServiceAdmin)
 admin.site.register(Car, CarAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderingLine, OrderLinesAdmin)
+admin.site.register(Profile)

@@ -10,5 +10,7 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('myorders/', views.OrdersByUserListView.as_view(), name='my_orders'),
     path('register/', views.register, name='register'),
+    path('profile/', views.profile, name='profile'),
+    path('profile_update/', views.profile_update, name='profile_update'),
 
 ]

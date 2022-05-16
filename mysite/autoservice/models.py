@@ -3,6 +3,7 @@ from datetime import datetime
 import pytz
 from django.contrib.auth.models import User
 from tinymce.models import HTMLField
+from PIL import Image
 
 # Create your models here.
 utc=pytz.UTC
@@ -118,3 +119,18 @@ class OrdersReview(models.Model):
     reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     date_created = models.DateTimeField('Order Date', default=datetime.today().replace(tzinfo=utc))
     content = models.TextField('Rewiew', max_length=2000)
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    photo = models.ImageField(default="default.jpg", upload_to="profile_photo")
+
+    def __str__(self):
+        return f"{self.user.username} profile"
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+        img = Image.open(self.photo.path)
+        if img.height > 300 or img.width > 300:
+            output_size = (250, 250)
+            img.thumbnail(output_size)
+            img.save(self.photo.path)
