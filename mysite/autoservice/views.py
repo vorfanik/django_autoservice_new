@@ -1,18 +1,17 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from .models import AutoModel, Service, Car, Order, OrdersReview
+from .models import Service, Car, Order, OrderingLine
 from django.shortcuts import render, get_object_or_404, reverse
-from django.views import generic
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.contrib.auth.forms import User
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
-from .forms import BookReviewForm, ProfileUpdateForm, UserUpdateForm
+from .forms import OrderReviewForm, ProfileUpdateForm, UserUpdateForm, UserOrderCreateForm
 from django.views.generic.edit import FormMixin
 from django.contrib.auth.decorators import login_required
+from django.utils.translation import gettext as _
 
 
 # Create your views here.
@@ -52,18 +51,18 @@ def car(request, car_id):
     return render(request, 'car.html', {'car': car})
 
 
-class OrdersListView(generic.ListView):
+class OrdersListView(ListView):
     model = Order
     paginate_by = 2
     template_name = 'orders_list.html'
     context_object_name = 'orders'
 
 
-class OrdersDetailView(FormMixin, generic.DetailView):
+class OrdersDetailView(FormMixin, DetailView):
     model = Order
     template_name = 'orders_detail.html'
     context_object_name = 'orders'
-    form_class = BookReviewForm
+    form_class = OrderReviewForm
 
     # nurodome, kur atsidursime komentaro sėkmės atveju.
     def get_success_url(self):
@@ -100,13 +99,101 @@ def search(request):
     return render(request, 'search.html', {'cars': search_results, 'query': query})
 
 
-class OrdersByUserListView(LoginRequiredMixin, generic.ListView):
+# cRud
+class OrdersByUserListView(LoginRequiredMixin, ListView):
     model = Order
     template_name = 'user_orders.html'
     context_object_name = 'orders'
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user).filter(status__exact='pr' or 'com').order_by('return_time')
+        return Order.objects.filter(user=self.request.user).filter(status__exact='con').order_by('return_time')
+
+
+# cRud
+class UserOrderDetailView(LoginRequiredMixin, DetailView):
+    model = Order
+    template_name = 'user_order_detail.html'
+    context_object_name = 'orders'
+
+
+# Crud
+class OrderByUserCreateView(LoginRequiredMixin, CreateView):
+    model = Order
+    # fields = ['car_id', 'return_time', 'status']
+    success_url = "/service/myorders/"
+    template_name = 'user_order_form.html'
+    form_class = UserOrderCreateForm
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+# Crud
+class OrderLineByUserCreateView(LoginRequiredMixin, CreateView):
+    model = OrderingLine
+    fields = ['service', 'quantity']
+    template_name = 'user_order_line_form.html'
+
+    def get_success_url(self):
+        return reverse('my_order', kwargs={'pk': self.kwargs['pk']})
+
+    def form_valid(self, form):
+        form.instance.order_id = Order.objects.get(pk=self.kwargs['pk'])
+        form.save()
+        return super().form_valid(form)
+
+
+# crUd
+class OrderLineByUserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = OrderingLine
+    fields = ['service', 'quantity']
+    template_name = 'user_order_line_form.html'
+
+    def get_success_url(self):
+        return reverse('my_order', kwargs={'pk': self.object.order_id.id})
+
+    def test_func(self):
+        order = self.get_object()
+        return self.request.user == order.order_id.user
+
+
+# cruD
+class OrderLineByUserDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = OrderingLine
+    template_name = 'order_line_delete.html'
+
+    def get_success_url(self):
+        return reverse('my_order', kwargs={'pk': self.object.order_id.id})
+
+    def test_func(self):
+        order = self.get_object()
+        return self.request.user == order.order_id.user
+
+
+# crUd
+class OrderByUserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Order
+    fields = ['car_id', 'return_time', 'status']
+    success_url = "/service/myorders/"
+    template_name = 'user_order_form.html'
+    # form_class = UserOrderCreateForm
+
+
+    def test_func(self):
+        order = self.get_object()
+        return self.request.user == order.user
+
+
+# cruD
+class OrderByUserDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Order
+    success_url = "/service/myorders/"
+    template_name = 'user_order_delete.html'
+
+    def test_func(self):
+        order = self.get_object()
+        return self.request.user == order.user
 
 
 @csrf_protect
@@ -121,19 +208,19 @@ def register(request):
         if password == password2:
             # tikriname, ar neužimtas username
             if User.objects.filter(username=username).exists():
-                messages.error(request, f'User name {username} already exists!')
+                messages.error(request, _('User name %s already exists!') % username)
                 return redirect('register')
             else:
                 # tikriname, ar nėra tokio pat email
                 if User.objects.filter(email=email).exists():
-                    messages.error(request, f'User with email Email {email} is already registered!')
+                    messages.error(request, _('User with email Email %s is already registered!') % email)
                     return redirect('register')
                 else:
                     # jeigu viskas tvarkoje, sukuriame naują vartotoją
                     User.objects.create_user(username=username, email=email, password=password)
                     return redirect('login')
         else:
-            messages.error(request, 'Passwords do not match!')
+            messages.error(request, _('Passwords do not match!'))
             return redirect('register')
     return render(request, 'registration/register.html')
 
@@ -141,6 +228,7 @@ def register(request):
 @login_required
 def profile(request):
     return render(request, 'profile.html')
+
 
 @login_required
 def profile_update(request):
@@ -150,7 +238,7 @@ def profile_update(request):
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            messages.success(request, f"Profile updated")
+            messages.success(request, _("Profile updated"))
             return redirect('profile')
     else:
         u_form = UserUpdateForm(instance=request.user)

@@ -4,60 +4,61 @@ import pytz
 from django.contrib.auth.models import User
 from tinymce.models import HTMLField
 from PIL import Image
+from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 utc=pytz.UTC
 
 
 class AutoModel(models.Model):
-    brand = models.CharField('Brand', max_length=200)
-    car_model = models.CharField('Model', max_length=200)
-    year = models.IntegerField('Year')
-    engine = models.CharField('Engine', max_length=200)
+    brand = models.CharField(_('Brand'), max_length=200)
+    car_model = models.CharField(_('Model'), max_length=200)
+    year = models.IntegerField(_('Year'))
+    engine = models.CharField(_('Engine'), max_length=200)
 
     def __str__(self):
         return f"{self.brand} {self.car_model}, {self.engine}, {self.year}"
 
     class Meta:
-        verbose_name = 'Car model'
-        verbose_name_plural = 'Car models'
+        verbose_name = _('Car model')
+        verbose_name_plural = _('Car models')
 
 
 class Service(models.Model):
-    name = models.CharField('Name', max_length=200)
-    price = models.FloatField(verbose_name="Price", null=True)
+    name = models.CharField(_('Name'), max_length=200)
+    price = models.FloatField(verbose_name=_("Price"), null=True)
 
     def __str__(self):
         return f"{self.name}: {self.price} euro"
 
     class Meta:
-        verbose_name = 'Service'
-        verbose_name_plural = 'Services'
+        verbose_name = _('Service')
+        verbose_name_plural = _('Services')
 
 
 class Car(models.Model):
-    client = models.CharField('Owner', max_length=100)
-    auto_model_id = models.ForeignKey('AutoModel', verbose_name="Car Model", on_delete=models.SET_NULL, null=True)
-    license_plate = models.CharField('License plate', max_length=10)
-    vin = models.CharField('VIN code', max_length=20,
-                           help_text='17 Characters <a href="https://www.vindecoderz.com/">VIN code</a>')
+    client = models.CharField(_('Owner'), max_length=100)
+    auto_model_id = models.ForeignKey('AutoModel', verbose_name=_("Car Model"), on_delete=models.SET_NULL, null=True)
+    license_plate = models.CharField(_('License plate'), max_length=10)
+    vin = models.CharField(_('VIN code'), max_length=20,
+                           help_text=_('17 Characters <a href="https://www.vindecoderz.com/">VIN code</a>'))
 
-    image = models.ImageField('Image', upload_to='cars_image', null=True)
-    description = HTMLField('Description', null=True)
+    image = models.ImageField(_('Image'), upload_to='cars_image', null=True)
+    description = HTMLField(_('Description'), null=True)
 
     def __str__(self):
         return f"{self.client}, {self.auto_model_id}, {self.license_plate}, VIN: {self.vin}"
 
     class Meta:
-        verbose_name = 'Car'
-        verbose_name_plural = 'Cars'
+        verbose_name = _('Car')
+        verbose_name_plural = _('Cars')
 
 
 class Order(models.Model):
-    order_date = models.DateTimeField('Order Date', default=datetime.today().replace(tzinfo=utc))
-    return_time = models.DateTimeField('Return time', null=True, blank=True)
-    car_id = models.ForeignKey('Car', verbose_name="Car", on_delete=models.SET_NULL, null=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    order_date = models.DateTimeField(_('Order Date'), default=datetime.today().replace(tzinfo=utc))
+    return_time = models.DateTimeField(_('Return time'), null=True, blank=True)
+    car_id = models.ForeignKey('Car', verbose_name=_("Car"), on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, verbose_name=_('User'), on_delete=models.SET_NULL, null=True, blank=True)
 
     @property
     def is_overdue(self):
@@ -77,29 +78,29 @@ class Order(models.Model):
         return f"{self.car_id}, {self.order_date}. Total Sum: {self.sum}"
 
     class Meta:
-        verbose_name = 'Order'
-        verbose_name_plural = 'Orders'
+        verbose_name = _('Order')
+        verbose_name_plural = _('Orders')
 
     STATUS = (
-        ('con', 'Confirmed'),
-        ('pr', 'In progress'),
-        ('com', 'Completed'),
-        ('can', 'Canceled'),
+        ('con', _('Confirmed')),
+        ('pr', _('In progress')),
+        ('com', _('Completed')),
+        ('can', _('Canceled')),
     )
 
     status = models.CharField(
         max_length=3,
         choices=STATUS,
         blank=True,
-        default='p',
-        help_text='Status',
+        default='con',
+        help_text=_('Status'),
     )
 
 
 class OrderingLine(models.Model):
-    order_id = models.ForeignKey('Order', verbose_name="Order", on_delete=models.SET_NULL, null=True, related_name='order_line')
-    service = models.ForeignKey('Service', verbose_name="Service", on_delete=models.SET_NULL, null=True)
-    quantity = models.IntegerField("Quantity")
+    order_id = models.ForeignKey('Order', verbose_name=_("Order"), on_delete=models.SET_NULL, null=True, related_name='order_line')
+    service = models.ForeignKey('Service', verbose_name=_("Service"), on_delete=models.SET_NULL, null=True)
+    quantity = models.IntegerField(_("Quantity"))
 
 
 
@@ -108,17 +109,17 @@ class OrderingLine(models.Model):
         return self.service.price * self.quantity
 
     def __str__(self):
-        return f"{self.service} – {self.quantity}: , "
+        return f"{self.service} – {self.quantity} pcs "
 
     class Meta:
-        verbose_name = 'Order line'
-        verbose_name_plural = 'Order lines'
+        verbose_name = _('Order line')
+        verbose_name_plural = _('Order lines')
 
 class OrdersReview(models.Model):
-    order = models.ForeignKey('Order', on_delete=models.SET_NULL, null=True, blank=True, related_name='reviews')
-    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    date_created = models.DateTimeField('Order Date', default=datetime.today().replace(tzinfo=utc))
-    content = models.TextField('Rewiew', max_length=2000)
+    order = models.ForeignKey('Order', verbose_name=_("Order"), on_delete=models.SET_NULL, null=True, blank=True, related_name='reviews')
+    reviewer = models.ForeignKey(User, verbose_name=_("User"), on_delete=models.SET_NULL, null=True, blank=True)
+    date_created = models.DateTimeField(_('Order Date'), default=datetime.today().replace(tzinfo=utc))
+    content = models.TextField(_('Rewiews'), max_length=2000)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

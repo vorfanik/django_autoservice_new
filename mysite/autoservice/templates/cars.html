@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Cars{% endblock %}
 
@@ -6,14 +7,14 @@
 {% load static %}
 <h1>Cars</h1>
 {% if cars %}
-<p>Cars registered in our service.</p>
+<p>{% trans "Cars registered in our service." %}</p>
 {% for car in cars %}
 <li><a href="{{ car.id }}">{{car.client}}, {{car.auto_model_id}} </a></li>
 <p>{{car.description | safe}}</p>
 <br>
 {% endfor %}
 {% else %}
-<p>No registered cars.</p>
+<p>{% trans "No registered cars." %}</p>
 {% endif %}
 <hr>
 <div class="container">

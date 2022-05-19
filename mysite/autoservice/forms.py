@@ -1,9 +1,8 @@
-from .models import OrdersReview
+from .models import OrdersReview, Profile, Order
 from django import forms
-from .models import Profile
 from django.contrib.auth.models import User
 
-class BookReviewForm(forms.ModelForm):
+class OrderReviewForm(forms.ModelForm):
     class Meta:
         model = OrdersReview
         fields = ('content', 'order', 'reviewer',)
@@ -21,3 +20,13 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['photo']
+
+class DateInput(forms.DateTimeInput):
+    input_type = 'datetime-local'
+
+
+class UserOrderCreateForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['car_id', 'return_time', 'status']
+        widgets = {'return_time': DateInput()}

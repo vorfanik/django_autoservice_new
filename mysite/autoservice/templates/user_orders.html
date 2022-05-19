@@ -1,29 +1,39 @@
 {% extends "base.html" %}
-
+{% load i18n %}
 {% block title %}My orders{% endblock %}
 
 {% block content %}
-<h3>My orders</h3>
+<h3>{% trans "My orders" %}</h3>
+<br>
+<div class="form-group" >
+    <a style="padding:8px 30px 8px 30px;" href="{% url 'my_order_new' %}" class="btn btn-outline-warning">{% trans "New" %}</a>
+</div>
 <br>
 {% if orders %}
 {% for order in orders %}
 <article class="media content-section">
     <div class="media-body">
         <div class="article-metadata">
-            <small class="text-muted">Order date: {{ order.order_date|date:"Y-m-d, f" }}</small>
+            <small class="text-muted">{% trans "Order date: " %}{{ order.order_date|date:"Y-m-d, f" }}</small>
         </div>
         <div class="article-metadata">
-            <small class="{% if order.is_overdue %}text-danger{% endif %}">Return date: {{order.return_time|date:"Y-m-d, f" }}</small>
+            <small class="{% if order.is_overdue %}text-danger{% endif %}">{% trans "Return date: " %}{{order.return_time|date:"Y-m-d, f" }}</small>
         </div>
         <p class="article-content">{{ order.car_id}}</p>
         <div class="btn-group btn-group-sm">
-            <a href="{% url 'order_datails' order.id %}" class="btn btn-outline-warning me-2">Details</a>
+            <a href="{% url 'my_order' order.id %}" class="btn btn-outline-warning me-2">{% trans "Details" %}</a>
+        </div>
+        <div class="btn-group btn-group-sm">
+            <a href="{% url 'my_order_update' order.id %}" class="btn btn-outline-warning me-2">{% trans "Update" %}</a>
+        </div>
+        <div class="btn-group btn-group-sm">
+            <a href="{% url 'my_order_delete' order.id %}" class="btn btn-outline-danger me-2">{% trans "Delete" %}</a>
         </div>
     </div>
 </article>
 <hr>
 {% endfor %}
 {% else %}
-<p>You have no orders.</p>
+<p>{% trans "You don't have orders." %}</p>
 {% endif %}
 {% endblock %}
