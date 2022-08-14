@@ -121,6 +121,9 @@ class OrdersReview(models.Model):
     date_created = models.DateTimeField(_('Order Date'), default=datetime.today().replace(tzinfo=utc))
     content = models.TextField(_('Rewiews'), max_length=2000)
 
+    class Meta:
+        ordering = ['-date_created']
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     photo = models.ImageField(default="default.jpg", upload_to="profile_photo")
