@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Delete Order{% endblock %}
+
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <h4>{% trans "Delete Order" %}</h4>
+            <hr>
+            <h5>{% trans "Are you sure you want to delete the order? " %}</h5>
+            <br>
+            <p>{{ order }}</p>
+            <br>
+            <button class="btn btn-outline-danger" type="submit">{% trans "Yes, delete" %}</button>
+            <a class="btn btn-outline-success" href="{% url 'my_orders' %}">{% trans "Cancel" %}</a>
+        </div>
+    </form>
+    </div>
+{% endblock content %}

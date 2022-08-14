@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Order{% endblock %}
+
+{% block content %}
+<div>
+    <h6 style="margin-bottom: 15px"> {{ orders.car_id }}</h6>
+    <div class="btn-group btn-group-sm">
+        <a href="{% url 'car' orders.car_id.id %}" class="btn btn-outline-warning me-2">{% trans "Car Details" %}</a>
+    </div>
+    <p style="margin-top: 15px"><strong>{% trans "Total Price: " %}</strong> {{ orders.sum }}</p>
+    <p><strong>{% trans "Status: " %}</strong> {{ orders.get_status_display }}</p>
+    <br>
+</div>
+
+<div style="margin-left:20px;margin-top:20px">
+    <h4>{% trans "Services:" %}</h4>
+    {% for line in orders.order_line.all %}
+    <hr>
+    <p><strong>{{ line.service.name }} </strong></p>
+    <p><strong>{% trans "Price: " %}</strong> {{ line.service.price }} </p>
+    <p><strong>{% trans "Quantities: " %}</strong> {{ line.quantity }} <strong>{% trans "Sum: " %}</strong> {{ line.sum }}</p>
+    {% endfor %}
+    <hr>
+</div>
+<br>
+{% if user.is_authenticated %}
+<div class="fieldWrapper">
+<h4 style="margin-bottom:15px">{% trans "Leave reviews:" %}</h4>
+<form action="" method="post">
+  {% csrf_token %}
+  {{ form.content }}<br>
+<div class="form-group" style="margin-top:15px">
+    <button type="submit" class="btn btn-outline-warning">{% trans "Send" %}</button>
+</div>
+</form>
+</div>
+{% endif %}
+<br>
+<h4>{% trans "Reviews:" %}</h4>
+{% if orders.reviews.all %}
+{% for review in orders.reviews.all %}
+<hr>
+<strong>{{ review.reviewer }}</strong>, <em>{{ review.date_created}}</em>
+<p>{{ review.content }}</p>
+{% endfor %}
+{% else %}
+<p>{% trans "The order has no reviews" %}</p>
+{% endif %}
+{% endblock %}
